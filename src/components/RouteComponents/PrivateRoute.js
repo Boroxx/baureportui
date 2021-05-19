@@ -1,15 +1,20 @@
-import React from 'react'
-import { Route, Redirect } from 'react-router-dom';
+import React from "react";
+import { Route, Redirect } from "react-router-dom";
 
-function PrivateRoute(props,{component:Component,...rest}) {
-    const jwtCheck = props.containsJWT;
-    return (
-        <Route {...rest} render={props => (
-            jwtCheck() ?
-                <Component {...props} />
-            : <Redirect to="/loginpage" />
-        )} />
-    )
+function PrivateRoute({ component: Component, containsJWT, ...rest }) {
+   
+    const {modulInfoData,setModulInfoData,fetchLoaded,setFetchIsLoaded} = rest;
+  return (
+    <Route
+      {...rest}
+      render={(props) =>(
+        containsJWT() ? <Component {...props} modulInfoData={modulInfoData}setModulInfoData={setModulInfoData}
+        fetchLoaded={fetchLoaded}
+        setFetchIsLoaded={setFetchIsLoaded} /> : <Redirect to="/loginpage" />
+      
+      )}
+    />
+  );
 }
 
-export default PrivateRoute
+export default PrivateRoute;

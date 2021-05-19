@@ -12,43 +12,60 @@ import ProjektUebersicht from "./components/ProjektUebersicht";
 import LoginModul from "./components/LoginModul";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/RouteComponents/PrivateRoute";
+import { faLongArrowAltUp } from "@fortawesome/free-solid-svg-icons";
+import Logout from "./components/Logout";
+import axios from "axios";
 
 function App() {
 
-  const bauModulListe = [
+
+  const containsJWT = () => {
+    const token = localStorage.getItem("auth");
+    if (token) {
+      axios.defaults.headers.common = { Authorization: `Bearer ${token}` };
+      return true;
+    } else return false;
+  };
+
+  /*ModulInfoData wird ,sobald das Dashboard mounted,mithilfe eines fetchs gesetzt
+    Ist umstaendlich da BasicModal auch Information braucht.
+  */ 
+  const [modulInfoData, setModulInfoData] = useState([
     {
-      bauModulName: "Gehwegabsenkung",
-      id: 1,
-      text:
-        "Falls Sie eine Gehwegabsenkung brauchen sind Sie hier genau richtig.",
+      bauModulName: "",
+      id: 0,
+      text: "",
     },
-    {
-      bauModulName: "Gehwegabsenkung",
-      id: 2,
-      text:
-        "Falls Sie eine Gehwegabsenkung brauchen sind Sie hier genau richtig.",
-    },
-  ];
-  const containsJWT = ()=>{
-    return false;
-  }
+  ]);
+
+  const [fetchLoaded, setFetchIsLoaded] = useState({
+    topbaumodule: false,
+    angebotanfrmodul: false,
+    anfrstatus: false,
+  });
 
   return (
     <Router>
       <Container fluid className="p-0">
         <Switch>
-          <Route path="/loginpage"> 
-          <LoginModul></LoginModul>
+          <Route path="/loginpage">
+            <LoginModul></LoginModul>
           </Route>
 
-          <PrivateRoute containsJWT={containsJWT} component={Dashboard} path="/dashboard" exact />
-          
-        
-
+          <PrivateRoute
+            containsJWT={containsJWT}
+            exact={true}
+            path="/dashboard"
+            component={Dashboard}
+            modulInfoData={modulInfoData}
+            setModulInfoData={setModulInfoData}
+            fetchLoaded={fetchLoaded}
+            setFetchIsLoaded={setFetchIsLoaded}
+          />
 
           <Route exact path="/baumodul/:id">
             <NavBar></NavBar>
-            <BasicModal bauModulListe={bauModulListe}></BasicModal>
+            <BasicModal modulInfoData={modulInfoData}/>
           </Route>
 
           <Route exact path="/projekt/:projektid">
@@ -59,6 +76,10 @@ function App() {
           <Route exact path="/baumodul/:id/dialog">
             <NavBar></NavBar>
             <GehwegModulDialog></GehwegModulDialog>
+          </Route>
+
+          <Route exact path="/logout">
+            <Logout></Logout>
           </Route>
         </Switch>
       </Container>

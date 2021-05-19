@@ -5,7 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AngebotAnfr from './AngebotAnfr';
 
 function AngebotAnfrModul(props) {
+
     const angebotListe= ["dummy"];
+
     return (
         <Container className="bg-light rounded  p-3">
             

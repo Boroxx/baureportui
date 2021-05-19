@@ -3,6 +3,7 @@ import {
   faQuestionCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 import React, { useState } from "react";
 import {
   Button,
@@ -18,6 +19,8 @@ function GehwegModulDialog() {
   const MAXDIALOG = 4;
   const [dialogState, setDialogState] = useState(0);
   const [faqState, setFaqState] = useState(false);
+  const [errorState, setErrorState] = useState({error:false,errormessage:""});
+  const [successState, setSuccessState] = useState({success:false,successmessage:""});
 
   const [gehwegModulData, setGehwegModulData] = useState({
     baumodul: 1,
@@ -31,6 +34,9 @@ function GehwegModulDialog() {
     laengsansicht: "",
   });
 
+  /**
+   * Handles Pagination
+   */
   const handleDialogStateForward = () => {
     if (dialogState < MAXDIALOG) setDialogState(dialogState + 1);
   };
@@ -39,6 +45,45 @@ function GehwegModulDialog() {
   };
 
   const handleFaq = () => setFaqState(!faqState);
+
+  /**
+   * Posting to /dashboard/gehwegabsenkung to create a ModulProject
+   */
+  const handleGehwegModulPost = (e)=>{
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("modulname", "Gehwegabsenkung");
+    formData.append("strasse_hausnummer", gehwegModulData.strasse_nummer);
+    formData.append("stadt_plz", gehwegModulData.stadt_plz);
+    formData.append("genehmigung", gehwegModulData.genehmigung);
+    formData.append("vorgarten", gehwegModulData.vorgarten);
+    
+    formData.append("frontansicht", gehwegModulData.frontansicht);
+    formData.append("laengsansicht", gehwegModulData.laengsansicht);
+    formData.append("anmerkung",gehwegModulData.anmerkungen);
+
+    //Erstelle Hindernissliste aus Checkboxen
+    const arrayHinderniss = Object.entries(gehwegModulData.hinderniss);
+    const hindernissList = arrayHinderniss.filter(([key,value]) =>value==true ).map(([key,value])=> key);
+    console.log(hindernissList);
+    formData.append("hinderniss",hindernissList);
+
+    const config = {
+      headers: {
+          'content-type': 'multipart/form-data'
+      }
+ 
+    }
+  axios.post("/dashboard/gehwegabsenkungmodul", formData,config).then((response)=>{
+    
+    if(response["status"]==200){
+      setSuccessState({success:true , successmessage:"Angebot erfolgreich angefordert."});
+    }
+  
+  }).catch((error)=>{
+    setErrorState({...error.data})
+  });
+  }
 
   return (
     <Container fluid className="p-0">
@@ -338,11 +383,14 @@ function GehwegModulDialog() {
           >
             <FontAwesomeIcon icon={faChevronCircleLeft} />
           </Button>
-          <Button variant="success">Angebot anfragen</Button>
+          <Button variant="success" onClick={handleGehwegModulPost}>Angebot anfragen</Button>
 
           <Button onClick={handleFaq} className="float-right" variant="dark">
             <FontAwesomeIcon icon={faQuestionCircle} />
           </Button>
+
+          {successState.success && <div className="alert-success mt-5 p-3"> {successState.successmessage}</div>}
+          {errorState.error && <div className="alert-danger mt-5 p-3"> {errorState.errormessage}</div> }
         </Container>
       )}
     </Container>

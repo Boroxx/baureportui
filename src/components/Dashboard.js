@@ -1,44 +1,55 @@
-import React,{useState} from 'react'
+import React, { useState, useEffect } from "react";
 import AnfrageStatus from "./AnfrageStatus";
 import AngebotAnfrModul from "./AngebotAnfrModul";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
+import { Route } from "react-router-dom";
 
 import TopBauModule from "./TopBauModule";
-import NavBar from './NavBar';
-function Dashboard() {
-    const [showInfoModul, setShowInfoModul] = useState(false);
-    const [modulInfoData, setModulInfoData] = useState({
-      bauModulName: "",
-      id: 0,
-      text: "",
-    });
-  
-    return (
-        <div>
-            <NavBar></NavBar>
+import NavBar from "./NavBar";
+import axios from "axios";
+import BasicModal from "./BasicModal";
+function Dashboard(props) {
+  const [showInfoModul, setShowInfoModul] = useState(false);
 
-<Row noGutters>
-  <Col xs={12} md={4} className="p-3">
-    <TopBauModule
-      modulInfoData={modulInfoData}
-      setModulInfoData={setModulInfoData}
-      showInfoModul={showInfoModul}
-      setShowInfoModul={setShowInfoModul}
-    >
-      {" "}
-    </TopBauModule>
-  </Col>
-  <Col xs={12} md={8} className="p-3">
-    <AngebotAnfrModul></AngebotAnfrModul>
-  </Col>
 
-  <Col xs={12} md={4} className="p-3">
-    <AnfrageStatus></AnfrageStatus>
-  </Col>
-  <Col xs={12} md={8}></Col>
-</Row>
-        </div>
-    )
+
+  useEffect(() => {
+    axios
+      .get("/dashboard/topbaumodule")
+      .then((response) => {
+        const data = response["data"];
+        props.setModulInfoData(data);
+
+        props.setFetchIsLoaded({topbaumodule: true });
+      })
+      .catch();
+    return () => {};
+  }, []);
+
+
+  return (
+    <div>
+      <NavBar></NavBar>
+
+      <Row noGutters>
+        <Col xs={12} md={4} className="p-3">
+          <TopBauModule
+            {...props}
+            showInfoModul={showInfoModul}
+            setShowInfoModul={setShowInfoModul}
+          ></TopBauModule>
+        </Col>
+        <Col xs={12} md={8} className="p-3">
+          <AngebotAnfrModul></AngebotAnfrModul>
+        </Col>
+
+        <Col xs={12} md={4} className="p-3">
+          <AnfrageStatus></AnfrageStatus>
+        </Col>
+        <Col xs={12} md={8}></Col>
+      </Row>
+    </div>
+  );
 }
 
-export default Dashboard
+export default Dashboard;
